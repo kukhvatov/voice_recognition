@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  whisper-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_SIZE=base
+    volumes:
+      - /tmp:/tmp  # для доступа к temp-файлам внутри контейнера
