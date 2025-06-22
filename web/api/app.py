@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 import whisper
 from pydub import AudioSegment
@@ -57,17 +57,15 @@ async def transcribe_audio(file: UploadFile = File(...)):
             initial_prompt="Стиль с пунктуацией"
         )
 
-        formatted_result = [
-            {
-                "start": round(segment["start"], 1),
-                "end": round(segment["end"], 1),
-                "text": segment["text"].strip()
-            }
-            for segment in result["segments"]
-        ]
+        transcript_text = ""
+        for i, segment in enumerate(result["segments"], 1):
+            transcript_text += f"Реплика {i}\n{segment['text'].strip()}\n\n"
+
+        transcript_text = transcript_text.strip()
+
         os.remove(audio_path)
 
-        return {"segments": formatted_result}
+        return Response(content=transcript_text, media_type="text/plain; charset=utf-8")
 
     except Exception as e:
         raise HTTPException(500, f"Processing error: {str(e)}")
